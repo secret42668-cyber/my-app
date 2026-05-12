@@ -1,0 +1,184 @@
+<!doctype html>
+<html lang="zh-Hant">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>Teaching English Coach</title>
+    <link rel="stylesheet" href="./styles.css" />
+  </head>
+  <body>
+    <main class="app-shell">
+      <header class="topbar">
+        <div>
+          <p class="eyebrow">Teaching Consultant English Coach</p>
+          <h1>教學顧問英文陪練器</h1>
+        </div>
+        <div class="streak-panel" aria-label="learning progress">
+          <span class="streak-number" id="streakCount">0</span>
+          <span class="streak-label">days practiced</span>
+        </div>
+      </header>
+
+      <nav class="stage-nav" id="stageNav" aria-label="learning steps"></nav>
+
+      <section class="learning-flow" aria-label="progressive learning flow">
+        <section class="stage-card" data-stage="0" aria-label="weekly themes">
+          <div class="panel-header">
+            <div>
+              <p class="eyebrow">Step 1</p>
+              <h2>先選這週要練的主題</h2>
+            </div>
+            <small id="themeCount">7 themes</small>
+          </div>
+          <div class="theme-list" id="themeList"></div>
+          <div class="toolkit" id="themeToolkit"></div>
+          <div class="stage-actions">
+            <button class="primary-button" type="button" data-next-stage="1">開始今日一句</button>
+          </div>
+        </section>
+
+        <section class="stage-card" data-stage="1" aria-label="daily prompt">
+          <div class="panel-header">
+            <div>
+              <p class="eyebrow">Step 2</p>
+              <h2 id="dailyTitle">今日一句</h2>
+            </div>
+            <button class="icon-button" id="completeTaskButton" type="button" aria-label="mark task complete" title="Mark complete">✓</button>
+          </div>
+          <div class="sentence-card">
+            <p id="dailySentence"></p>
+            <span class="source-pill" id="dailySource"></span>
+            <div class="sentence-actions">
+              <button class="ghost-button" id="speakButton" type="button">▶ Listen</button>
+              <button class="ghost-button" id="favoriteDailyButton" type="button">♡ 喜歡</button>
+              <button class="ghost-button" id="practiceDailyButton" type="button">↻ 再練</button>
+            </div>
+          </div>
+          <div class="task-steps" id="taskSteps"></div>
+          <div class="daily-question" id="dailyQuestion"></div>
+          <div class="stage-actions">
+            <button class="secondary-button" type="button" data-next-stage="0">回主題</button>
+            <button class="primary-button" type="button" data-next-stage="2">看 30 句核心句</button>
+          </div>
+        </section>
+
+        <section class="stage-card" data-stage="2" aria-label="core sentence patterns">
+          <div class="panel-header compact">
+            <div>
+              <p class="eyebrow">Step 3</p>
+              <h2>句型與專業詞卡</h2>
+            </div>
+          </div>
+          <p class="stage-copy">先選 10 句你最順口的，不需要一次全部背起來。</p>
+          <div class="source-note" id="coreSourceNote"></div>
+          <div class="mode-switch" aria-label="sentence source">
+            <button class="mode-button" id="builtInModeButton" type="button">內建句型</button>
+            <button class="mode-button" id="savedModeButton" type="button">我的儲存句型</button>
+          </div>
+          <div class="question-bank" id="questionBank"></div>
+          <div class="vocab-cards" id="vocabCards"></div>
+          <div class="core-sentences" id="coreSentences"></div>
+          <div class="stage-actions">
+            <button class="secondary-button" type="button" data-next-stage="1">回今日一句</button>
+            <button class="primary-button" type="button" data-next-stage="3">進入改寫練習</button>
+          </div>
+        </section>
+
+        <section class="stage-card" data-stage="3" aria-label="rewrite practice">
+          <div class="panel-header compact">
+            <div>
+              <p class="eyebrow">Step 4</p>
+              <h2>把你的觀察改成英文</h2>
+            </div>
+          </div>
+          <label class="field">
+            <span>換成你的觀察句</span>
+            <textarea id="dailyInput" rows="5" placeholder="例如：老師用圖片和手勢幫助學生理解課堂流程。"></textarea>
+          </label>
+          <div class="button-row">
+            <button class="primary-button" id="rewriteDailyButton" type="button">產生回饋改寫</button>
+            <button class="secondary-button" id="saveDailyButton" type="button">收藏到句庫</button>
+          </div>
+          <div class="feedback-box" id="dailyFeedback" aria-live="polite"></div>
+
+          <div class="divider"></div>
+
+          <label class="field">
+            <span>或輸入一段完整中文觀察</span>
+            <textarea id="rewriteInput" rows="7">老師自己看起來也很享受這門課，無論是在台前或者繞教室看學生狀況，都帶著韻律與熱情。</textarea>
+          </label>
+          <button class="primary-button full" id="rewriteButton" type="button">生成三種版本</button>
+          <div class="rewrite-results" id="rewriteResults"></div>
+          <div class="stage-actions">
+            <button class="secondary-button" type="button" data-next-stage="2">回 30 句</button>
+            <button class="primary-button" type="button" data-next-stage="4">進入情境對話</button>
+          </div>
+        </section>
+
+        <section class="stage-card" data-stage="4" aria-label="scenario conversation">
+          <div class="panel-header compact">
+            <div>
+              <p class="eyebrow">Step 5</p>
+              <h2>觀課後回饋對話</h2>
+            </div>
+            <button class="ghost-button" id="resetDialogueButton" type="button">Reset</button>
+          </div>
+          <div class="chat-window" id="chatWindow"></div>
+          <div class="chat-input-row">
+            <input id="chatInput" type="text" placeholder="用英文或中文回答都可以" />
+            <button class="primary-button" id="sendChatButton" type="button">Send</button>
+          </div>
+          <div class="stage-actions">
+            <button class="secondary-button" type="button" data-next-stage="3">回改寫</button>
+            <button class="primary-button" type="button" data-next-stage="5">看句庫與回顧</button>
+          </div>
+        </section>
+
+        <section class="stage-card" data-stage="5" aria-label="phrase bank and weekly review">
+          <div class="summary-grid">
+            <section class="bank-panel" aria-label="personal sentence bank">
+              <div class="panel-header compact">
+                <div>
+                  <p class="eyebrow">My Phrase Bank</p>
+                  <h2>我的專業句庫</h2>
+                </div>
+                <select id="bankFilter" aria-label="filter phrase bank">
+                  <option value="all">All</option>
+                  <option value="opening">開場句</option>
+                  <option value="praise">稱讚句</option>
+                  <option value="observation">觀察句</option>
+                  <option value="suggestion">建議句</option>
+                  <option value="favorite">喜歡的句型</option>
+                  <option value="practice">想再練習</option>
+                  <option value="meeting">下次開會可用</option>
+                </select>
+              </div>
+              <div class="phrase-bank" id="phraseBank"></div>
+            </section>
+
+            <section class="review-panel" aria-label="weekly review">
+              <div class="panel-header compact">
+                <div>
+                  <p class="eyebrow">Weekly Review</p>
+                  <h2>本週回顧</h2>
+                </div>
+              </div>
+              <div class="review-stats">
+                <div><strong id="completedCount">0</strong><span>完成任務</span></div>
+                <div><strong id="savedCount">0</strong><span>收藏句子</span></div>
+                <div><strong id="practiceCount">0</strong><span>對話輪次</span></div>
+              </div>
+              <p class="review-copy" id="weeklyReview"></p>
+            </section>
+          </div>
+          <div class="stage-actions">
+            <button class="secondary-button" type="button" data-next-stage="4">回對話練習</button>
+            <button class="primary-button" type="button" data-next-stage="0">回到主題</button>
+          </div>
+        </section>
+      </section>
+    </main>
+
+    <script src="./app.js"></script>
+  </body>
+</html>
