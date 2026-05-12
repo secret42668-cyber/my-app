@@ -5,7 +5,7 @@ function defaultClassContext() {
   return {
     className: "",
     schoolStage: "國中",
-    subjectArea: "語文／閱讀／寫作",
+    subjectArea: "語文",
     courseTopic: "",
     courseGoals: "",
     courseFileName: "",
@@ -63,6 +63,23 @@ const titles = {
   3: "檢視第一版回饋",
   4: "精修回饋文字"
 };
+
+const subjectAreaOptions = [
+  "語文",
+  "語言與文化",
+  "英文",
+  "人文",
+  "自然",
+  "專案",
+  "數學",
+  "體育",
+  "培力",
+  "藝術",
+  "生涯",
+  "國中選修",
+  "高中跨域必修",
+  "高中選修"
+];
 
 const directionLabels = ["肯定亮點", "激勵前進", "具體改進", "穩定節奏", "完成任務", "建立自信"];
 const positiveTraitLabels = ["主動積極", "穩定踏實", "有創意", "願意試誤", "表達清楚", "小組貢獻", "作品完整", "思考深入"];
@@ -130,13 +147,29 @@ function syncActiveCourseSnapshot() {
 }
 
 function normalizeCourse(course) {
+  const classContext = { ...defaultClassContext(), ...(course.classContext || {}) };
+  classContext.subjectArea = normalizeSubjectArea(classContext.subjectArea);
   return {
     id: course.id || crypto.randomUUID(),
     title: course.title || courseTitle(course.classContext || {}),
-    classContext: { ...defaultClassContext(), ...(course.classContext || {}) },
+    classContext,
     students: Array.isArray(course.students) ? course.students.map(normalizeStudent) : [],
     updatedAt: course.updatedAt || new Date().toISOString()
   };
+}
+
+function normalizeSubjectArea(area) {
+  const legacyMap = {
+    "語文／閱讀／寫作": "語文",
+    "英文／語言文化": "英文",
+    "自然／科學": "自然",
+    "人文／社會": "人文",
+    "藝術／設計／策展": "藝術",
+    "專案／研究": "專案",
+    "綜合／培力／人際": "培力"
+  };
+  if (subjectAreaOptions.includes(area)) return area;
+  return legacyMap[area] || "語文";
 }
 
 function clone(value) {
@@ -204,6 +237,7 @@ function renderAuthState(mode) {
     authTitle.textContent = "目前使用本機模式";
     authDescription.textContent = "尚未設定 Supabase 後台；資料會保存在這台裝置的瀏覽器，也可以用 JSON 匯出備份。";
     syncStatus.textContent = "本機模式";
+    authPanel.classList.add("is-local");
     authForm.classList.remove("is-signed-in");
     authEmail.disabled = true;
     authPassword.disabled = true;
@@ -213,6 +247,7 @@ function renderAuthState(mode) {
     return;
   }
 
+  authPanel.classList.remove("is-local");
   authEmail.disabled = false;
   authPassword.disabled = false;
   signInButton.disabled = false;
@@ -363,6 +398,7 @@ function syncContextFromForm() {
 }
 
 function fillContextForm() {
+  state.classContext.subjectArea = normalizeSubjectArea(state.classContext.subjectArea);
   document.querySelector("#className").value = state.classContext.className;
   document.querySelector("#schoolStage").value = state.classContext.schoolStage;
   document.querySelector("#subjectArea").value = state.classContext.subjectArea;
@@ -563,7 +599,10 @@ function deriveGoalTags() {
     { keys: ["實驗", "自然", "科學", "研究", "專題"], tags: ["實驗操作穩定", "能觀察紀錄", "推論有依據", "研究細節待補", "能修正方法"] },
     { keys: ["數學", "計算", "定義", "解題"], tags: ["能掌握概念", "解題策略清楚", "計算需更穩", "定義應再複習", "能獨立練習"] },
     { keys: ["英文", "口說", "聽力", "字彙"], tags: ["口說勇敢", "聽力理解佳", "字彙需累積", "拼字需練習", "能用英文表達"] },
-    { keys: ["體育", "運動", "飛盤", "球"], tags: ["動作學習快", "團隊精神佳", "規則理解進步", "移動反應待練", "情緒調節需練習"] }
+    { keys: ["體育", "運動", "飛盤", "球"], tags: ["動作學習快", "團隊精神佳", "規則理解進步", "移動反應待練", "情緒調節需練習"] },
+    { keys: ["語言與文化", "文化", "跨文化"], tags: ["能理解文化差異", "能連結生活經驗", "表達觀點清楚", "價值判斷待深化", "能尊重不同觀點"] },
+    { keys: ["培力", "生涯", "自我", "目標"], tags: ["自我覺察清楚", "能設定目標", "行動規劃待補", "能反思經驗", "主動參與活動"] },
+    { keys: ["選修", "跨域", "跨域必修"], tags: ["能整合不同領域", "能深入探究興趣", "成果表達清楚", "主動投入任務", "探究方向待聚焦"] }
   ];
   const matched = banks
     .filter((bank) => bank.keys.some((key) => contextText.includes(key)))
@@ -956,13 +995,19 @@ function pickVariant(options, seed) {
 
 function subjectSentence(area, topic) {
   if (area.includes("語文")) return `從文本理解、表達到作品產出，都能回到「${topic}」的學習目標來觀察。`;
+  if (area.includes("語言與文化")) return "跨文化理解、價值判斷與表達，是這門課的重要觀察重點。";
   if (area.includes("英文")) return "在聽說讀寫、字彙累積與表達勇氣上，都可以看見具體的學習線索。";
-  if (area.includes("數學")) return "概念理解、定義運用與獨立練習，是這門課最重要的觀察重點。";
-  if (area.includes("自然")) return "從觀察、實作、資料整理到概念說明，都能看見學習狀態。";
   if (area.includes("人文")) return "從資料蒐集、觀點形成到議題連結，都能看見學習深度。";
-  if (area.includes("藝術")) return "作品完整度、媒材運用與創作理念，是這門課的重要表現。";
+  if (area.includes("自然")) return "從觀察、實作、資料整理到概念說明，都能看見學習狀態。";
   if (area.includes("專案")) return "從規劃、執行、修正到成果呈現，都能看見專案能力的累積。";
+  if (area.includes("數學")) return "概念理解、定義運用與獨立練習，是這門課最重要的觀察重點。";
   if (area.includes("體育")) return "參與態度、動作穩定度與團隊互動，是這門課的重要表現。";
+  if (area.includes("培力")) return "自我覺察、任務參與與和他人互動，是這門課的重要學習線索。";
+  if (area.includes("藝術")) return "作品完整度、美感選擇、媒材運用與創作理念，是這門課的重要表現。";
+  if (area.includes("生涯")) return "自我探索、目標設定與行動規劃，是這門課的重要觀察重點。";
+  if (area.includes("國中選修")) return "課程參與、任務完成與個人興趣的展現，是這門課的重要學習線索。";
+  if (area.includes("高中跨域必修")) return "跨域整合、議題探究與成果表達，是這門課的重要觀察重點。";
+  if (area.includes("高中選修")) return "個人興趣、深入探究與作品或任務成果，是這門課的重要表現。";
   return "課堂參與、任務完成與自我調整，都是值得觀察的學習線索。";
 }
 
